@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>英语作文精批系统</title>
+    <link rel="stylesheet" href="/static/css/style.css?v=20241125-6">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-graduation-cap"></i> 英语作文精批系统</h1>
+            <p class="subtitle">AI驱动的智能作文批改与指导平台</p>
+        </header>
+
+        <!-- 导航栏 -->
+        <nav class="top-nav">
+            <button class="nav-btn active" data-page="correct">
+                <i class="fas fa-edit"></i> 批改作文
+            </button>
+            <button class="nav-btn" data-page="history">
+                <i class="fas fa-history"></i> 历史记录
+            </button>
+            <button class="nav-btn" data-page="batch">
+                <i class="fas fa-layer-group"></i> 批量处理
+            </button>
+            <button class="nav-btn" data-page="analytics">
+                <i class="fas fa-chart-bar"></i> 数据分析
+            </button>
+        </nav>
+
+        <!-- 页面容器 -->
+        <div class="pages-container">
+            <!-- 页面1: 批改作文 -->
+            <div class="page active" id="page-correct">
+                <div class="main-content">
+                    <!-- 输入区域 -->
+                    <div class="input-section card">
+                        <div class="section-header">
+                            <h2><i class="fas fa-edit"></i> 输入信息</h2>
+                            <button class="btn-secondary" id="loadExampleBtn">
+                                <i class="fas fa-magic"></i> 加载示例
+                            </button>
+                        </div>
+
+                        <form id="essayForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="question_content">
+                                        <i class="fas fa-book-open"></i> 题目内容
+                                        <span class="required">*</span>
+                                    </label>
+                                    <textarea id="question_content" name="question_content" rows="3"
+                                        placeholder="请输入作文题目和要求..." required></textarea>
+                                </div>
+
+                                <!-- 输入方式切换 -->
+                                <div class="form-group full-width">
+                                    <label>
+                                        <i class="fas fa-toggle-on"></i> 输入方式
+                                    </label>
+                                    <div class="input-mode-tabs">
+                                        <button type="button" class="mode-tab active" data-mode="text">
+                                            <i class="fas fa-keyboard"></i> 文本输入
+                                        </button>
+                                        <button type="button" class="mode-tab" data-mode="image">
+                                            <i class="fas fa-image"></i> 图片上传
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- 文本输入区域 -->
+                                <div class="form-group full-width input-mode-content" id="text-input-area">
+                                    <label for="student_answer">
+                                        <i class="fas fa-pen-nib"></i> 学生答案
+                                        <span class="required">*</span>
+                                    </label>
+                                    <textarea id="student_answer" name="student_answer" rows="8"
+                                        placeholder="请输入学生的英语作文..." required></textarea>
+                                </div>
+
+                                <!-- 图片上传区域 -->
+                                <div class="form-group full-width input-mode-content" id="image-input-area" style="display: none;">
+                                    <label>
+                                        <i class="fas fa-camera"></i> 上传作文图片
+                                        <span class="required">*</span>
+                                    </label>
+                                    <div class="image-upload-area" id="imageUploadArea">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                        <p>点击或拖拽上传作文图片</p>
+                                        <small>支持格式：PNG, JPG, JPEG</small>
+                                        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+                                    </div>
+                                    <div class="image-preview" id="imagePreview" style="display: none;">
+                                        <img id="previewImg" src="" alt="作文预览">
+                                        <div class="image-actions">
+                                            <button type="button" class="btn-secondary" id="removeImage">
+                                                <i class="fas fa-trash"></i> 移除图片
+                                            </button>
+                                            <button type="button" class="btn-primary" id="ocrProcessBtn">
+                                                <i class="fas fa-magic"></i> OCR识别
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="ocr-result" id="ocrResult" style="display: none;">
+                                        <label>识别结果：</label>
+                                        <textarea id="ocrText" rows="6" placeholder="OCR识别的文本将显示在这里..."></textarea>
+                                    </div>
+
+                                    <!-- OCR文本块可视化区域 -->
+                                    <div class="ocr-visualization" id="ocrVisualization" style="display: none;">
+                                        <div class="section-header">
+                                            <h3><i class="fas fa-search-plus"></i> 文本块可视化</h3>
+                                            <div class="header-actions">
+                                                <span class="visualization-hint">
+                                                    <i class="fas fa-info-circle"></i> 点击下方查看按钮查看详细标注
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="visualization-content">
+                                            <div class="image-with-boxes" id="imageWithBoxes">
+                                                <img id="boxesImg" src="" alt="作文图片预览">
+                                                <div class="thumbnail-overlay" id="thumbnailOverlay">
+                                                    <div class="overlay-content">
+                                                        <i class="fas fa-search-plus"></i>
+                                                        <p>OCR识别完成</p>
+                                                        <p class="small-text">共检测到 <span id="blockCount">0</span> 个文本块</p>
+                                                    </div>
+                                                </div>
+                                                <button type="button" class="view-original-btn" id="viewOcrOriginalBtn">
+                                                    <i class="fas fa-expand"></i> 查看详细标注
+                                                </button>
+                                            </div>
+                                            <div class="text-blocks-list" id="textBlocksList">
+                                                <h4>检测到的文本块列表</h4>
+                                                <div id="blocksContainer">
+                                                    <!-- 动态生成的文本块将插入这里 -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="grade">
+                                        <i class="fas fa-user-graduate"></i> 年级
+                                    </label>
+                                    <input type="text" id="grade" name="grade" placeholder="如：高中一年级">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="total_score">
+                                        <i class="fas fa-star"></i> 题目总分
+                                    </label>
+                                    <input type="text" id="total_score" name="total_score" value="15" placeholder="15">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="subject_chs">
+                                        <i class="fas fa-book"></i> 科目
+                                    </label>
+                                    <input type="text" id="subject_chs" name="subject_chs" value="英语">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="breakdown_type">
+                                        <i class="fas fa-list-ul"></i> 细分题型
+                                    </label>
+                                    <input type="text" id="breakdown_type" name="breakdown_type" placeholder="如：记叙文">
+                                </div>
+                            </div>
+
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary" id="submitBtn">
+                                    <span class="btn-text">
+                                        <i class="fas fa-magic"></i> 开始批改
+                                    </span>
+                                    <span class="btn-loader" style="display: none;">
+                                        <i class="fas fa-spinner fa-spin"></i> 批改中...
+                                    </span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- 结果展示区域 -->
+                    <div class="result-section card" id="resultSection" style="display: none;">
+                        <div class="section-header">
+                            <h2><i class="fas fa-chart-line"></i> 批改结果</h2>
+                            <button class="btn-secondary" id="copyResultBtn">
+                                <i class="fas fa-copy"></i> 复制结果
+                            </button>
+                        </div>
+
+                        <!-- 批改结果主布局 - 左右分栏 -->
+                        <div class="result-main-layout">
+                            <!-- 左侧：自适应图片区域 -->
+                            <div class="result-image-panel">
+                                <div class="image-container">
+                                    <img id="resultBoxesImg" src="" alt="作文图片预览">
+                                    <div class="image-actions">
+                                        <button type="button" class="view-original-btn" id="viewResultOriginalBtn">
+                                            <i class="fas fa-expand"></i> 查看详细标注
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 右侧：完整批改结果内容 -->
+                            <div class="result-content-panel">
+                                <div id="resultContent">
+                                    <!-- 结果将通过JavaScript动态填充 -->
+                                </div>
+
+                                <!-- 智能标注区域（位于右侧批改结果底部） -->
+                                <div class="result-annotation-section" id="resultAnnotationSection" style="display: none;">
+                                    <div class="section-header">
+                                        <h3><i class="fas fa-images"></i> 智能标注可视化</h3>
+                                        <div class="header-actions">
+                                            <span class="annotation-hint">
+                                                <i class="fas fa-info-circle"></i> 基于AI批改结果的智能标注
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div class="annotation-list-panel" id="resultAnnotationList">
+                                        <h4>智能标注列表</h4>
+                                        <div id="resultBlocksContainer">
+                                            <!-- 动态生成的智能标注列表将插入这里 -->
+                                        </div>
+                                    </div>
+                                    <div class="annotation-stats">
+                                        <span id="resultBlockCount">0</span> 个标注
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 弹窗：查看原图 -->
+            <div class="annotation-modal" id="annotationModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3><i class="fas fa-search-plus"></i> 查看原图与智能标注</h3>
+                        <button class="close-modal-btn" id="closeModalBtn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="modal-image-container" id="modalImageWithBoxes">
+                            <img id="modalBoxesImg" src="" alt="原图带标注">
+                            <!-- 动态生成的智能标注框将插入这里 -->
+                        </div>
+                        <div class="modal-annotation-list" id="modalAnnotationList">
+                            <h4>智能标注列表</h4>
+                            <div id="modalBlocksContainer">
+                                <!-- 动态生成的智能标注列表将插入这里 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面2: 历史记录 -->
+            <div class="page" id="page-history">
+                <div class="page-header">
+                    <h2><i class="fas fa-history"></i> 历史记录</h2>
+                    <div class="page-actions">
+                        <button class="btn-primary" id="viewHistoryViewerBtn">
+                            <i class="fas fa-eye"></i> 查看历史记录
+                        </button>
+                        <button class="btn-secondary" id="exportHistoryBtn">
+                            <i class="fas fa-download"></i> 导出全部
+                        </button>
+                        <button class="btn-secondary" id="clearHistoryBtn">
+                            <i class="fas fa-trash"></i> 清空历史
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 筛选器 -->
+                <div class="page-filters">
+                    <div class="filter-group">
+                        <input type="text" id="searchInput" placeholder="搜索题目或内容..." class="search-input">
+                    </div>
+                    <div class="filter-group">
+                        <select id="gradeFilter" class="filter-select">
+                            <option value="">全部年级</option>
+                            <option value="高中一年级">高中一年级</option>
+                            <option value="高中二年级">高中二年级</option>
+                            <option value="高中三年级">高中三年级</option>
+                            <option value="初中">初中</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <select id="scoreFilter" class="filter-select">
+                            <option value="">全部分数</option>
+                            <option value="0-5">0-5分</option>
+                            <option value="6-10">6-10分</option>
+                            <option value="11-15">11-15分</option>
+                            <option value="16-20">16-20分</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <input type="date" id="dateFilter" class="filter-input">
+                    </div>
+                </div>
+
+                <!-- 历史记录内容区域 -->
+                <div class="page-content">
+                    <div id="historyList" class="history-list">
+                        <!-- 动态填充 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面3: 批量处理 -->
+            <div class="page" id="page-batch">
+                <div class="card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-layer-group"></i> 批量处理</h2>
+                    </div>
+
+                    <div class="batch-tabs">
+                        <button class="tab-btn active" data-tab="upload">上传作文</button>
+                        <button class="tab-btn" data-tab="queue">处理队列</button>
+                        <button class="tab-btn" data-tab="results">批量结果</button>
+                    </div>
+
+                    <!-- 上传页面 -->
+                    <div class="tab-content active" id="tab-upload">
+                        <div class="upload-area" id="uploadArea">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <h3>拖拽文件到此处或点击上传</h3>
+                            <p>支持格式：.txt, .csv, .json</p>
+                            <input type="file" id="batchFileInput" multiple accept=".txt,.csv,.json" style="display: none;">
+                            <button class="btn-primary" onclick="document.getElementById('batchFileInput').click()">
+                                <i class="fas fa-folder-open"></i> 选择文件
+                            </button>
+                        </div>
+
+                        <div class="batch-preview" id="batchPreview" style="display: none;">
+                            <h3>预览 (前5条)</h3>
+                            <div id="batchPreviewList"></div>
+                            <div class="batch-actions">
+                                <button class="btn-primary" id="startBatchBtn">
+                                    <i class="fas fa-play"></i> 开始批量批改
+                                </button>
+                                <button class="btn-secondary" id="cancelBatchBtn">
+                                    <i class="fas fa-times"></i> 取消
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 队列页面 -->
+                    <div class="tab-content" id="tab-queue">
+                        <div class="queue-list" id="queueList">
+                            <div class="empty-state">
+                                <i class="fas fa-tasks"></i>
+                                <h3>暂无处理任务</h3>
+                                <p>上传文件开始批量批改</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 结果页面 -->
+                    <div class="tab-content" id="tab-results">
+                        <div id="batchResults">
+                            <div class="empty-state">
+                                <i class="fas fa-chart-line"></i>
+                                <h3>暂无批改结果</h3>
+                                <p>完成批改后结果将显示在这里</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面4: 数据分析 -->
+            <div class="page" id="page-analytics">
+                <div class="card">
+                    <div class="section-header">
+                        <h2><i class="fas fa-chart-bar"></i> 数据分析</h2>
+                        <div class="header-actions">
+                            <button class="btn-secondary" id="exportReportBtn">
+                                <i class="fas fa-file-export"></i> 导出报告
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 统计卡片 -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                                <i class="fas fa-file-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">新增批改数</div>
+                                <div class="stat-value" id="totalCorrected">0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">平均分</div>
+                                <div class="stat-value" id="averageScore">0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">最高分</div>
+                                <div class="stat-value" id="highestScore">0</div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                                <i class="fas fa-percentage"></i>
+                            </div>
+                            <div class="stat-content">
+                                <div class="stat-label">进步率</div>
+                                <div class="stat-value" id="improvementRate">0%</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 图表区域 -->
+                    <div class="charts-grid">
+                        <div class="chart-container card">
+                            <h3><i class="fas fa-chart-bar"></i> 分数分布</h3>
+                            <div id="scoreDistribution" class="chart"></div>
+                        </div>
+                        <div class="chart-container card">
+                            <h3><i class="fas fa-chart-line"></i> 趋势分析</h3>
+                            <div id="trendChart" class="chart"></div>
+                        </div>
+                    </div>
+
+                    <!-- 详细统计 -->
+                    <div class="details-grid">
+                        <div class="card">
+                            <h3><i class="fas fa-exclamation-circle"></i> 常见错误</h3>
+                            <div id="commonErrors" class="error-list">
+                                <!-- 动态填充 -->
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3><i class="fas fa-list-alt"></i> 最近批改</h3>
+                            <div id="recentCorrections" class="recent-list">
+                                <!-- 动态填充 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 加载提示 -->
+        <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>AI正在精心批改您的作文，请稍候...</p>
+        </div>
+    </div>
+
+    <script src="/static/js/main.js?v=20241125-12"></script>
+
+</body>
+</html>

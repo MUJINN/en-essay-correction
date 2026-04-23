@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.pyc
+
+# Virtual environments
+venv/
+venv_new/
+env/
+
+# Data directories
+data/
+history_records/
+
+# Local editor settings
+.vscode/
+
+# Local database
+*.db

@@ -1,0 +1,21 @@
+API Key配置
+# 正式服务Key（已注释）
+# key: app-k49WkHyKjGAhFjb5KEURR5m2
+
+# 测试服务Key（打分测试）
+key: app-cq4PpR4Steux0yMUG3Kc0GXZ
+
+
+Request
+POST
+/workflows/run
+curl -X POST 'http://dify.iyunxiao.com/v1/workflows/run' \
+--header 'Authorization: Bearer {api_key}' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "inputs": {},
+  "response_mode": "streaming",
+  "user": "abc-123"
+}'
+
+启动方式：source venv/bin/activate && uvicorn api_v2:app_v2 --host 0.0.0.0 --port 8008 --reload &

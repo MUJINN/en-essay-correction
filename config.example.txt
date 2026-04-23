@@ -1,0 +1,16 @@
+# 环境配置示例
+
+# 复制此文件为 "一些配置和说明.txt" 并填入真实的API Key
+
+# Dify 工作流 API Key
+key: app-xxxxxxxxxxxxxxxxxxxxxxxx
+
+# OCR服务地址（已在代码中硬编码，如需修改请编辑 api_v2.py）
+# OCR_URL: http://49.7.214.122:8001/ocr/batch
+
+# 工作流API地址（已在代码中硬编码，如需修改请编辑 api_v2.py）
+# WORKFLOW_URL: http://dify.iyunxiao.com/v1/workflows/run
+
+# 服务器配置
+# HOST: 10.10.2.40
+# PORT: 8008
