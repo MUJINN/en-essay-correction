@@ -1,154 +1,76 @@
-# 英语作文精批系统
+# English Essay Correction System
 
-## 📚 文档导航
+An educational AI project for English essay correction. The system combines OCR-assisted input handling, AI-based scoring, annotation matching, persistence, and frontend integration to turn essay grading into a usable product workflow.
 
-- **[API接口文档](./API_DOCUMENTATION.md)** - 完整的API接口说明
-- **[前端开发文档](./FRONTEND_README.md)** - 前端开发指南和架构说明
-- **[项目交接清单](./HANDOVER.md)** - 给前端同事的完整交接文档
-- **[配置示例](./config.example.txt)** - 环境配置模板
+## What this project does
 
-## 架构
+- Accepts essay text and OCR results as correction input
+- Calls AI workflows to generate structured correction results
+- Matches correction annotations back to OCR coordinates
+- Persists correction records for later lookup
+- Provides frontend pages and API endpoints for interactive use
 
-本系统采用**后端主导架构**，OCR识别和智能标注匹配在后端完成，数据持久化到数据库。
+## Why it matters
 
-## 核心文件
+This repository is more than a prompt wrapper. It represents an end-to-end essay correction product flow:
 
-### 后端服务
-- `api_v2.py` - API服务（FastAPI）
-- `models.py` - 数据库模型（SQLAlchemy）
-- `database.py` - 数据库连接
-- `schemas.py` - 请求/响应模型
-- `annotation_matcher.py` - 智能标注匹配算法
-- `init_db.py` - 数据库初始化脚本
+- OCR understanding
+- correction generation
+- annotation alignment
+- record storage
+- frontend/backend integration
 
-### 前端
-- `static/js/main.js` - 前端逻辑
-- `static/js/api_client_v2.js` - API客户端
+## Main components
 
-### 模板和静态文件
-- `templates/index.html` - 主页模板
-- `static/` - CSS、JS、图片等静态资源
+- `api_v2.py`: main API service
+- `annotation_matcher.py`: aligns correction annotations with OCR text and coordinates
+- `database.py`, `models.py`, `schemas.py`: persistence and data models
+- `dify_ocr_enhanced.py`: OCR and workflow integration logic
+- `templates/`, `static/`: frontend pages and assets
 
-### 历史记录
-- `history_records/` - JSON格式的历史记录文件
+## Repository structure
 
-## 快速开始
-
-### 1. 安装依赖
-
-```bash
-pip install fastapi uvicorn sqlalchemy pydantic requests
+```text
+en-essay-correction/
+├── api_v2.py
+├── annotation_matcher.py
+├── database.py
+├── models.py
+├── schemas.py
+├── dify_ocr_enhanced.py
+├── init_db.py
+├── templates/
+├── static/
+├── API_DOCUMENTATION.md
+├── FRONTEND_README.md
+└── HANDOVER.md
 ```
 
-### 2. 初始化数据库
+## Quick start
 
 ```bash
+pip install -r requirements.txt
 python init_db.py
-```
-
-### 3. 启动服务
-
-```bash
 python api_v2.py
-# 或
-nohup ./venv/bin/uvicorn api_v2:app_v2 --host 0.0.0.0 --port 8008 > nohup.out 2>&1 &
 ```
 
-### 4. 访问
+Then open the API docs or frontend page exposed by the service.
 
-- API文档：http://10.10.2.40:8008/docs
+## Key capabilities
 
-## API端点
+- OCR + essay correction workflow
+- Structured AI correction output
+- Annotation-to-coordinate matching
+- History persistence and retrieval
+- Frontend and backend integration
 
-### OCR识别
-```
-POST /api/v2/ocr
-参数: multipart/form-data (image)
-返回: OCR坐标数据 + 图片ID
-```
+## Related docs
 
-### 批改API
-```
-POST /api/v2/correct
-参数: {
-    ocr_data: {...},      # OCR数据（可选）
-    student_answer: "...",
-    question_content: "...",
-    grade: "...",
-    ...
-}
-返回: 批改结果 + OCR坐标 + 智能标注匹配
-```
+- [API_DOCUMENTATION.md](./API_DOCUMENTATION.md)
+- [FRONTEND_README.md](./FRONTEND_README.md)
+- [HANDOVER.md](./HANDOVER.md)
+- [config.example.txt](./config.example.txt)
 
-### 历史记录
-```
-GET /api/v2/history/list?page=1&size=20  # 列表
-GET /api/v2/history/{record_id}           # 详情（包含完整OCR数据）
-```
+## Notes
 
-## 功能特点
-
-### 智能标注
-- 支持精彩表达、良好表达和待改进表达标注
-- 智能匹配OCR坐标和标注文本
-- 可视化展示智能标注
-
-### 历史记录
-- 自动保存批改结果
-- 支持跨设备同步
-- 完整的智能标注恢复
-
-## 数据库
-
-### 表结构
-- `ocr_data` - OCR识别结果和坐标
-- `correction_results` - 批改结果和智能标注
-- `history_records` - 历史记录主表
-
-### 初始化
-```bash
-python init_db.py
-```
-
-## 配置
-
-### OCR服务
-- 地址：http://49.7.214.122:8001/ocr/batch
-- 如需修改，编辑相关API文件
-
-### 工作流API
-- 地址：http://dify.iyunxiao.com/v1/workflows/run
-- API Key配置在"一些配置和说明.txt"文件中
-
-## 部署
-
-### 开发环境
-```bash
-uvicorn api_v2:app_v2 --reload --port 8008
-```
-source /home/wangdi5/en-essay-correction/venv_new/bin/activate && uvicorn api_v2:app_v2 --host 0.0.0.0 --port 8008
-
-### 生产环境
-```bash
-# 使用Gunicorn
-pip install gunicorn
-gunicorn api_v2:app_v2 -w 4 -k uvicorn.workers.UvicornWorker --bind 10.10.2.40:8008
-```
-
-## 注意事项
-
-1. 首次使用需要运行`python init_db.py`初始化数据库
-2. 历史记录文件存储在`history_records/`目录中
-3. 静态文件存储在`static/`目录中
-
-## 开发团队
-
-### 后端开发
-- 负责人: [填写]
-
-### 前端开发
-- 负责人: [填写]
-
-## 许可证
-
-内部使用项目
+This public repository is a cleaned release version prepared for portfolio and code-sharing use. Local runtime data, databases, and private environment files were excluded.
